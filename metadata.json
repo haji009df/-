@@ -1,0 +1,6 @@
+{
+  "name": "Younes Abad",
+  "description": "2D top-down driving game with 100 Iranian highway stages, procedural synth music, garage customization, and character perks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
