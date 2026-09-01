@@ -2,19 +2,25 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 
 interface SteeringWheelProps {
   onSteer: (normalizedAngle: number) => void;
-  onHorn: () => void;
+  onHorn?: () => void;
   size?: number;
 }
 
 export const SteeringWheel: React.FC<SteeringWheelProps> = ({
   onSteer,
   onHorn,
-  size = 135,
+  size = 145,
 }) => {
   const wheelRef = useRef<HTMLDivElement>(null);
   const [rotationDeg, setRotationDeg] = useState<number>(0);
   const isDraggingRef = useRef<boolean>(false);
   const startTouchRef = useRef<{ x: number; y: number; baseAngle: number }>({ x: 0, y: 0, baseAngle: 0 });
+
+  const triggerHorn = useCallback(() => {
+    if (typeof onHorn === 'function') {
+      onHorn();
+    }
+  }, [onHorn]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!wheelRef.current) return;
@@ -26,10 +32,10 @@ export const SteeringWheel: React.FC<SteeringWheelProps> = ({
     const dx = e.clientX - centerX;
     const dy = e.clientY - centerY;
 
-    // Check if clicked in the dead center (Horn)
+    // Check if clicked in the center pad (Horn)
     const distFromCenter = Math.sqrt(dx * dx + dy * dy);
-    if (distFromCenter < 28) {
-      onHorn();
+    if (distFromCenter < 45) {
+      triggerHorn();
       return;
     }
 
@@ -54,35 +60,29 @@ export const SteeringWheel: React.FC<SteeringWheelProps> = ({
     const dy = e.clientY - centerY;
     const currentAngleRad = Math.atan2(dy, dx);
     
-    // Calculate rotational delta
     let deltaRad = currentAngleRad - startTouchRef.current.baseAngle;
-    // Normalize delta between -PI and +PI
     while (deltaRad > Math.PI) deltaRad -= Math.PI * 2;
     while (deltaRad < -Math.PI) deltaRad += Math.PI * 2;
 
-    const targetDeg = Math.max(-75, Math.min(75, deltaRad * (180 / Math.PI) * 1.5));
+    const targetDeg = Math.max(-80, Math.min(80, deltaRad * (180 / Math.PI) * 1.5));
     setRotationDeg(targetDeg);
-    onSteer(targetDeg / 75);
+    onSteer(targetDeg / 80);
   };
 
   const handlePointerUp = () => {
     isDraggingRef.current = false;
-    // Spring back smoothly
     setRotationDeg(0);
     onSteer(0);
   };
 
-  // Keyboard controls fallback for desktop
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        setRotationDeg(-50);
+        setRotationDeg(-55);
         onSteer(-0.75);
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        setRotationDeg(50);
+        setRotationDeg(55);
         onSteer(0.75);
-      } else if (e.key === 'h' || e.key === 'H' || e.key === ' ') {
-        onHorn();
       }
     };
 
@@ -99,7 +99,7 @@ export const SteeringWheel: React.FC<SteeringWheelProps> = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [onSteer, onHorn]);
+  }, [onSteer]);
 
   return (
     <div
@@ -107,7 +107,7 @@ export const SteeringWheel: React.FC<SteeringWheelProps> = ({
       className="relative flex items-center justify-center select-none touch-none"
       style={{ width: size, height: size }}
     >
-      {/* Outer Wheel Rim */}
+      {/* Peugeot-Style Modern Sport Steering Wheel Rim */}
       <div
         id="steering-wheel-disc"
         ref={wheelRef}
@@ -115,35 +115,41 @@ export const SteeringWheel: React.FC<SteeringWheelProps> = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className="w-full h-full rounded-full border-4 border-slate-700 bg-slate-900/90 shadow-2xl relative cursor-grab active:cursor-grabbing flex items-center justify-center transition-transform duration-75"
+        className="w-full h-full rounded-full border-[7px] border-slate-900 bg-gradient-to-br from-slate-900 via-slate-950 to-zinc-900 shadow-2xl relative cursor-grab active:cursor-grabbing flex items-center justify-center transition-transform duration-75"
         style={{
           transform: `rotate(${rotationDeg}deg)`,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.6), inset 0 0 16px rgba(15,23,42,0.9)',
+          boxShadow: '0 10px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(15,23,42,0.95)',
         }}
       >
-        {/* Leather Grip Segments */}
-        <div className="absolute top-2 w-7 h-3 bg-red-600/80 rounded-full" />
-        <div className="absolute left-2 w-3 h-7 bg-slate-700/80 rounded-full" />
-        <div className="absolute right-2 w-3 h-7 bg-slate-700/80 rounded-full" />
+        {/* Flat Bottom Accent & Leather Grip Texture */}
+        <div className="absolute top-1 w-8 h-3 bg-red-600 rounded-full shadow-md" />
+        <div className="absolute left-1 w-3 h-10 bg-slate-800 rounded-full border border-slate-700" />
+        <div className="absolute right-1 w-3 h-10 bg-slate-800 rounded-full border border-slate-700" />
 
-        {/* 3 Wheel Spokes */}
-        <div className="absolute w-full h-3 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 rounded-sm" />
-        <div className="absolute h-1/2 w-3 bg-gradient-to-b from-slate-600 to-slate-800 bottom-0 rounded-sm" />
+        {/* Sculpted Metallic Spokes (Peugeot i-Cockpit style) */}
+        <div className="absolute w-full h-3.5 bg-gradient-to-r from-slate-700 via-zinc-400 to-slate-700 rounded-sm shadow-inner" />
+        <div className="absolute h-1/2 w-4 bg-gradient-to-b from-zinc-500 via-slate-800 to-slate-900 bottom-0 rounded-sm shadow-inner" />
+        <div className="absolute w-3/4 h-2 bg-gradient-to-r from-slate-800 via-zinc-600 to-slate-800 top-3 rounded-full" />
 
-        {/* Center Horn Button (دکمه بوق یونس آباد) */}
+        {/* Center Horn Pad & Chrome Lion Emblem */}
         <button
           id="center-horn-button"
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onHorn();
+            triggerHorn();
           }}
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-red-600 via-red-700 to-red-900 border-2 border-red-400/60 shadow-lg flex flex-col items-center justify-center text-white z-10 active:scale-95 transition-transform"
+          className="w-13 h-13 rounded-full bg-gradient-to-br from-slate-900 via-zinc-900 to-slate-950 border-2 border-zinc-500/80 shadow-xl flex flex-col items-center justify-center text-white z-10 active:scale-95 transition-transform group"
+          title="بوق"
         >
-          <span className="text-[10px] font-black tracking-tight text-white drop-shadow">یونس</span>
-          <span className="text-[8px] font-bold text-amber-200">بوق 📢</span>
+          {/* Chrome Lion Silhouette Badge */}
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 flex items-center justify-center shadow-md border border-amber-200">
+            <span className="text-[10px] font-black text-slate-950">🦁</span>
+          </div>
+          <span className="text-[7px] font-black tracking-widest text-amber-300 mt-0.5">PEUGEOT</span>
         </button>
       </div>
     </div>
   );
 };
+

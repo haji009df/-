@@ -46,6 +46,7 @@ export class GameEngine {
   public steeringWheelAngle: number = 0; // -1 to +1 normalized
   public isSteeringActive: boolean = false;
   public isHornPressed: boolean = false;
+  public isBraking: boolean = false;
 
   // Object Pools (Zero Allocations in Loop)
   private readonly MAX_TRAFFIC = 25;
@@ -196,7 +197,7 @@ export class GameEngine {
     this.nitroTimer = 0;
 
     this.playerX = this.roadLeftX + this.roadWidth / 2;
-    this.playerY = this.height - 130;
+    this.playerY = Math.max(160, this.height - 185);
     this.playerAngle = 0;
     this.playerSpeedKmh = 0;
     this.currentGear = 1;
@@ -246,9 +247,9 @@ export class GameEngine {
     this.height = h;
     this.canvas.width = w;
     this.canvas.height = h;
-    this.roadWidth = Math.min(w * 0.8, 300);
+    this.roadWidth = Math.min(w * 0.88, 340);
     this.roadLeftX = (w - this.roadWidth) / 2;
-    this.playerY = h - 130;
+    this.playerY = Math.max(160, h - 185);
   }
 
   public start(): void {
@@ -272,11 +273,34 @@ export class GameEngine {
   }
 
   // ==========================================
+  // ROAD CURVE & GEOMETRY
+  // ==========================================
+  public getRoadCurve(y: number): number {
+    const dist = (this.roadScrollY - y) * 0.0018;
+    const stageVal = this.currentStage * 1.37;
+    // Multi-frequency noise combination for truly random, non-repeating road curves (straight, double right, triple left, etc.)
+    const c1 = Math.sin(dist * 0.7 + stageVal) * 38;
+    const c2 = Math.sin(dist * 0.28 + stageVal * 0.5) * 44;
+    const c3 = Math.cos(dist * 0.12 + stageVal * 0.2) * 28;
+    const straightMod = Math.sin(dist * 0.05) > 0.4 ? 0.3 : 1.2;
+    return (c1 + c2 + c3) * straightMod;
+  }
+
+  public getRoadLeftX(y: number): number {
+    return (this.width - this.roadWidth) / 2 + this.getRoadCurve(y);
+  }
+
+
+  // ==========================================
   // INPUT HANDLERS
   // ==========================================
   public setSteering(normalizedAngle: number): void {
     this.steeringWheelAngle = Math.max(-1, Math.min(1, normalizedAngle));
     this.isSteeringActive = Math.abs(normalizedAngle) > 0.05;
+  }
+
+  public setBraking(braking: boolean): void {
+    this.isBraking = braking;
   }
 
   public shiftGear(gear: number): void {
@@ -308,29 +332,31 @@ export class GameEngine {
   }
 
   public triggerNitro(): void {
-    if (!this.milestones.nitroUnlocked || this.nitroCharges <= 0 || this.nitroActive) return;
+    if (this.nitroCharges <= 0 || this.nitroActive) return;
     this.nitroCharges--;
     this.nitroActive = true;
-    this.nitroTimer = 2.2; // 2.2 seconds burst
+    this.nitroTimer = 2.0; // Exactly 2 seconds burst
+    const baseTopSpeed = this.playerCar.topSpeed * this.playerCharacter.perks.speedMultiplier;
+    this.playerSpeedKmh = Math.max(160, baseTopSpeed * 2.0); // Doubled speed!
     audioManager.playNitro();
 
     // Spawn burst particles
-    for (let i = 0; i < 20; i++) {
-      this.spawnParticle(this.playerX + (Math.random() * 16 - 8), this.playerY + 28, 'flame');
+    for (let i = 0; i < 24; i++) {
+      this.spawnParticle(this.playerX + (Math.random() * 20 - 10), this.playerY + 28, 'flame');
     }
   }
 
   public triggerGun(): void {
     if (!this.milestones.gunUnlocked || this.gunAmmo <= 0) return;
     const now = performance.now();
-    if (now - this.lastShotTime < 200) return; // Rate limiter
+    if (now - this.lastShotTime < 180) return; // Rate limiter
     this.lastShotTime = now;
     this.gunAmmo--;
     audioManager.playGunshot();
 
-    // Spawn 2 bullets (dual mounted hood guns)
-    this.spawnBullet(this.playerX - 10, this.playerY - 25);
-    this.spawnBullet(this.playerX + 10, this.playerY - 25);
+    // Spawn 2 high velocity bullets (dual mounted hood guns)
+    this.spawnBullet(this.playerX - 12, this.playerY - 26);
+    this.spawnBullet(this.playerX + 12, this.playerY - 26);
   }
 
   // ==========================================
@@ -358,53 +384,67 @@ export class GameEngine {
     if (this.isGameOver) return;
 
     // 1. Calculate Target Top Speed based on Gear, Car Stats, Character Perks & Nitro
-    let maxGearSpeed = 65;
-    if (this.currentGear === 2) maxGearSpeed = 125;
-    if (this.currentGear === 3) maxGearSpeed = 205;
+    let maxGearSpeed = 70;
+    if (this.currentGear === 2) maxGearSpeed = 135;
+    if (this.currentGear === 3) maxGearSpeed = 220;
 
     // Factor in car topSpeed stat & character multiplier
     const carMaxSpeed = this.playerCar.topSpeed * this.playerCharacter.perks.speedMultiplier;
     let effectiveMaxSpeed = Math.min(maxGearSpeed, carMaxSpeed);
 
     if (this.nitroActive) {
-      effectiveMaxSpeed = carMaxSpeed * 1.35;
+      // Doubled speed for 2 seconds!
+      effectiveMaxSpeed = carMaxSpeed * 2.0;
       this.nitroTimer -= dt;
+      if (Math.random() < 0.8) {
+        this.spawnParticle(this.playerX - 8, this.playerY + 24, 'flame');
+        this.spawnParticle(this.playerX + 8, this.playerY + 24, 'flame');
+      }
       if (this.nitroTimer <= 0) {
         this.nitroActive = false;
       }
     }
 
     // 2. Acceleration & Braking
-    const accelRate = (this.playerCar.acceleration / 100) * (this.nitroActive ? 180 : 80);
-    if (this.playerSpeedKmh < effectiveMaxSpeed) {
-      this.playerSpeedKmh += accelRate * dt;
-      if (this.playerSpeedKmh > effectiveMaxSpeed) this.playerSpeedKmh = effectiveMaxSpeed;
-    } else if (this.playerSpeedKmh > effectiveMaxSpeed) {
-      // Natural engine drag
-      this.playerSpeedKmh -= 90 * dt;
-      if (this.playerSpeedKmh < effectiveMaxSpeed) this.playerSpeedKmh = effectiveMaxSpeed;
+    if (this.isBraking) {
+      this.playerSpeedKmh = Math.max(0, this.playerSpeedKmh - 260 * dt);
+      if (this.playerSpeedKmh > 20 && Math.random() < 0.5) {
+        this.spawnParticle(this.playerX - 10, this.playerY + 22, 'drift');
+        this.spawnParticle(this.playerX + 10, this.playerY + 22, 'drift');
+      }
+    } else {
+      const accelRate = (this.playerCar.acceleration / 100) * (this.nitroActive ? 240 : 95);
+      if (this.playerSpeedKmh < effectiveMaxSpeed) {
+        this.playerSpeedKmh += accelRate * dt;
+        if (this.playerSpeedKmh > effectiveMaxSpeed) this.playerSpeedKmh = effectiveMaxSpeed;
+      } else if (this.playerSpeedKmh > effectiveMaxSpeed) {
+        // Natural engine drag
+        this.playerSpeedKmh -= 90 * dt;
+        if (this.playerSpeedKmh < effectiveMaxSpeed) this.playerSpeedKmh = effectiveMaxSpeed;
+      }
     }
 
     // Update audio engine pitch
     audioManager.updateEnginePitch(this.playerSpeedKmh, this.currentGear);
 
     // 3. Steering & Chassis Physics
-    const handlingPower = (this.playerCar.handling / 100) * this.playerCharacter.perks.handlingMultiplier * 260;
+    const handlingPower = (this.playerCar.handling / 100) * this.playerCharacter.perks.handlingMultiplier * 260 * 0.95;
     const steerForce = this.steeringWheelAngle * handlingPower * (this.playerSpeedKmh / 100);
     this.playerX += steerForce * dt;
 
-    // Keep player inside road boundaries
+    // Keep player inside road boundaries with edge collision explosion
+    const curRoadLeft = this.getRoadLeftX(this.playerY);
     const carHalfW = 16;
-    const minX = this.roadLeftX + carHalfW;
-    const maxX = this.roadLeftX + this.roadWidth - carHalfW;
-    if (this.playerX < minX) {
+    const minX = curRoadLeft + carHalfW;
+    const maxX = curRoadLeft + this.roadWidth - carHalfW;
+    if (this.playerX <= minX) {
       this.playerX = minX;
-      // Shoulder friction
-      this.playerSpeedKmh = Math.max(20, this.playerSpeedKmh - 60 * dt);
-    } else if (this.playerX > maxX) {
+      this.handleEdgeCollision();
+    } else if (this.playerX >= maxX) {
       this.playerX = maxX;
-      this.playerSpeedKmh = Math.max(20, this.playerSpeedKmh - 60 * dt);
+      this.handleEdgeCollision();
     }
+
 
     // Chassis tilt angle
     const targetAngle = this.steeringWheelAngle * 0.22;
@@ -475,9 +515,32 @@ export class GameEngine {
       // Siren animation for emergency vehicles
       npc.sirenTime += dt;
 
-      // Steady lane positioning (Cars stay strictly in their lane without swerving or drifting)
-      npc.x = this.roadLeftX + (npc.lane + 0.5) * laneW;
-      npc.turnSignal = 'none';
+      // Curved Road dynamic position & Lane changing
+      const curRoadLeft = this.getRoadLeftX(npc.y);
+      if (npc.laneChangeProgress < 1) {
+        npc.laneChangeProgress += dt * 2.2;
+        const startX = curRoadLeft + (npc.lane + 0.5) * laneW;
+        const targetX = curRoadLeft + (npc.targetLane + 0.5) * laneW;
+        npc.x = startX + (targetX - startX) * Math.min(1, npc.laneChangeProgress);
+        if (npc.laneChangeProgress >= 1) {
+          npc.lane = npc.targetLane;
+          npc.turnSignal = 'none';
+        }
+      } else {
+        npc.x = curRoadLeft + (npc.lane + 0.5) * laneW;
+      }
+
+      // Swerving AI behavior (Exciting sudden turn when player gets close)
+      if (npc.aiBehavior === 'swerving' && !npc.swervedTowardsPlayer) {
+        const distToPlayer = this.playerY - npc.y;
+        if (distToPlayer > 35 && distToPlayer < 200) {
+          npc.swervedTowardsPlayer = true;
+          const newLane = npc.lane === 0 ? 1 : npc.lane === 2 ? 1 : (Math.random() > 0.5 ? 0 : 2);
+          npc.targetLane = newLane;
+          npc.turnSignal = newLane > npc.lane ? 'right' : 'left';
+          npc.laneChangeProgress = 0;
+        }
+      }
 
       // Honk reaction: If player honks, car speeds up slightly to acknowledge
       const distToPlayer = this.playerY - npc.y;
@@ -606,6 +669,20 @@ export class GameEngine {
       color = chosenType === 'ambulance' ? '#f8fafc' : '#dc2626';
       secondaryColor = chosenType === 'ambulance' ? '#ef4444' : '#facc15';
       health = 2;
+    } else if (chosenType === 'police') {
+      width = 34;
+      height = 72;
+      speed = 55 + Math.random() * 28;
+      color = '#1e3a8a';
+      secondaryColor = '#ffffff';
+      health = 2;
+    } else if (chosenType === 'pickup') {
+      width = 36;
+      height = 70;
+      speed = 40 + Math.random() * 22;
+      color = '#15803d';
+      secondaryColor = '#fef08a';
+      health = 1;
     } else if (chosenType === 'cyber') {
       width = 34;
       height = 64;
@@ -645,7 +722,7 @@ export class GameEngine {
     slot.isHonked = false;
     slot.sirenTime = 0;
     slot.overtaken = false;
-    slot.aiBehavior = 'normal';
+    slot.aiBehavior = Math.random() < 0.15 ? 'swerving' : 'normal';
     slot.swervedTowardsPlayer = false;
     slot.turnSignal = 'none';
     slot.turnSignalTimer = 0;
@@ -658,8 +735,8 @@ export class GameEngine {
   private spawnTrafficCar(): void {
     const lane = Math.floor(Math.random() * this.laneCount);
     const laneW = this.roadWidth / this.laneCount;
-    const x = this.roadLeftX + (lane + 0.5) * laneW;
     const y = -120 - Math.random() * 100;
+    const x = this.getRoadLeftX(y) + (lane + 0.5) * laneW;
 
     // Minimum distance spacing between cars in the same lane (keeps generous gap to weave)
     const minSpacing = 160;
@@ -684,7 +761,7 @@ export class GameEngine {
     bullet.active = true;
     bullet.x = x;
     bullet.y = y;
-    bullet.vy = -650;
+    bullet.vy = -800;
   }
 
   private updateBullets(dt: number): void {
@@ -761,28 +838,48 @@ export class GameEngine {
   // ==========================================
   private updateRoadItems(dt: number, worldSpeed: number): void {
     // Spawn road items & obstacles periodically with generous spacing
-    if (Math.random() < dt * 1.5) {
-      const lane = Math.floor(Math.random() * this.laneCount);
-      const laneW = this.roadWidth / this.laneCount;
-      const x = this.roadLeftX + (lane + 0.5) * laneW;
-      
-      // Check if there is an active car too close to spawn point in this lane
-      const isCarNearby = this.trafficPool.some(c => c.active && Math.abs(c.x - x) < 30 && Math.abs(c.y - (-60)) < 90);
-      if (!isCarNearby) {
-        const rand = Math.random();
-        if (rand < 0.14) {
-          // Spawn Road Obstacle (موانع جاده‌ای)
-          const obstacleTypes: RoadItemType[] = ['barrier', 'barrel', 'oilSlick', 'rock', 'cone'];
-          const chosenObstacle = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-          this.spawnRoadItem(x, -60, chosenObstacle, 0, true);
-        } else if (rand < 0.28 && this.lives < this.maxLives) {
-          this.spawnRoadItem(x, -60, 'heart', 1, false);
-        } else if (rand < 0.42 && this.milestones.nitroUnlocked) {
-          this.spawnRoadItem(x, -60, 'nitro', 1, false);
-        } else if (rand < 0.56 && this.milestones.gunUnlocked) {
-          this.spawnRoadItem(x, -60, 'ammo', 2, false);
-        } else {
-          this.spawnRoadItem(x, -60, 'coin', 1, false);
+    if (Math.random() < dt * 1.6) {
+      const rand = Math.random();
+
+      // Check if we should spawn an edge shoulder barrier / cone or sponsor sign on multiples of 9
+      if (this.currentStage % 9 === 0 && Math.random() < 0.22) {
+        const isLeftEdge = Math.random() > 0.5;
+        const edgeX = isLeftEdge ? this.roadLeftX - 16 : this.roadLeftX + this.roadWidth + 16;
+        this.spawnRoadItem(edgeX, -60, 'sponsorSign', 0, true);
+      } else if (rand < 0.18) {
+        // Spawn specifically on the left or right road edge / shoulder
+        const isLeftEdge = Math.random() > 0.5;
+        const edgeX = isLeftEdge 
+          ? this.roadLeftX + 10 
+          : this.roadLeftX + this.roadWidth - 10;
+        
+        const edgeObstacleTypes: RoadItemType[] = ['barrier', 'barrel', 'cone', 'rock'];
+        const chosenEdgeObs = edgeObstacleTypes[Math.floor(Math.random() * edgeObstacleTypes.length)];
+        this.spawnRoadItem(edgeX, -60, chosenEdgeObs, 0, true);
+      } else {
+        const lane = Math.floor(Math.random() * this.laneCount);
+        const laneW = this.roadWidth / this.laneCount;
+        const x = this.roadLeftX + (lane + 0.5) * laneW;
+        
+        // Check if there is an active car too close to spawn point in this lane
+        const isCarNearby = this.trafficPool.some(c => c.active && Math.abs(c.x - x) < 30 && Math.abs(c.y - (-60)) < 90);
+        if (!isCarNearby) {
+          if (this.currentStage % 5 === 0 && Math.random() < 0.08) {
+            this.spawnRoadItem(x, -60, 'star', 5, false);
+          } else if (rand < 0.30) {
+            // Spawn Lane Road Obstacle (موانع جاده‌ای)
+            const obstacleTypes: RoadItemType[] = ['barrier', 'barrel', 'oilSlick', 'rock', 'cone'];
+            const chosenObstacle = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+            this.spawnRoadItem(x, -60, chosenObstacle, 0, true);
+          } else if (rand < 0.45 && this.lives < this.maxLives) {
+            this.spawnRoadItem(x, -60, 'heart', 1, false);
+          } else if (rand < 0.60) {
+            this.spawnRoadItem(x, -60, 'nitro', 1, false);
+          } else if (rand < 0.75 && this.milestones.gunUnlocked) {
+            this.spawnRoadItem(x, -60, 'ammo', 2, false);
+          } else {
+            this.spawnRoadItem(x, -60, 'coin', 1, false);
+          }
         }
       }
     }
@@ -894,6 +991,24 @@ export class GameEngine {
     } else if (item.type === 'ammo') {
       this.gunAmmo = Math.min(this.milestones.gunMaxAmmo + 3, this.gunAmmo + 3);
       audioManager.playCoin();
+    } else if (item.type === 'star') {
+      // Special weapon activation: instantly destroys all traffic cars on screen
+      audioManager.playCrash();
+      this.trafficPool.forEach(npc => {
+        if (npc.active) {
+          npc.active = false;
+          for (let s = 0; s < 15; s++) {
+            this.spawnParticle(npc.x, npc.y, 'spark');
+            this.spawnParticle(npc.x, npc.y, 'smoke');
+          }
+        }
+      });
+      const bonusCoins = 150 * this.currentStage;
+      this.stageCoinsCollected += bonusCoins;
+      this.saveData.coins += bonusCoins;
+      for (let s = 0; s < 25; s++) {
+        this.spawnParticle(item.x, item.y, 'coinGlow');
+      }
     }
 
     saveGameSave(this.saveData);
@@ -1043,7 +1158,29 @@ export class GameEngine {
   // ==========================================
   // CRASH & STAGE MANAGEMENT
   // ==========================================
+  private handleEdgeCollision(): void {
+    if (this.nitroActive || this.isInvulnerable) return;
+    this.lives--;
+    audioManager.playCrash();
+    this.playerSpeedKmh = Math.max(10, this.playerSpeedKmh * 0.2);
+    this.isInvulnerable = true;
+    this.invulnerableTimer = 2.0;
+
+    for (let s = 0; s < 20; s++) {
+      this.spawnParticle(this.playerX, this.playerY, 'spark');
+      this.spawnParticle(this.playerX, this.playerY, 'smoke');
+    }
+
+    if (this.lives <= 0) {
+      this.isGameOver = true;
+      if (this.onGameOver) {
+        this.onGameOver(this);
+      }
+    }
+  }
+
   private handlePlayerCrash(npc: PooledTrafficCar): void {
+
     this.lives--;
     audioManager.playCrash();
     this.playerSpeedKmh = Math.max(15, this.playerSpeedKmh * 0.4); // Slow down sharply
@@ -1114,9 +1251,10 @@ export class GameEngine {
       h,
       this.currentBiome,
       this.roadScrollY,
-      this.roadLeftX,
+      (this.width - this.roadWidth) / 2,
       this.roadWidth,
-      this.laneCount
+      this.laneCount,
+      this.getRoadCurve.bind(this)
     );
 
     // 2. Draw Road Items & Obstacles
@@ -1174,6 +1312,27 @@ export class GameEngine {
           ctx.fillStyle = '#eab308';
           ctx.fillRect(-7, -8, 5, 16);
           ctx.fillRect(2, -8, 5, 16);
+        } else if (it.type === 'star') {
+          // Multi-color sparkling special star item
+          const starHue = (this.totalGameTime * 350) % 360;
+          ctx.fillStyle = `hsl(${starHue}, 100%, 60%)`;
+          ctx.shadowColor = `hsl(${starHue}, 100%, 70%)`;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          for (let s = 0; s < 5; s++) {
+            const angle = (s * Math.PI * 2) / 5 - Math.PI / 2 + it.rotation;
+            const r = s % 2 === 0 ? 18 : 9;
+            const sx = Math.cos(angle) * r;
+            const sy = Math.sin(angle) * r;
+            if (s === 0) ctx.moveTo(sx, sy);
+            else ctx.lineTo(sx, sy);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
         }
 
         ctx.restore();
@@ -1271,8 +1430,8 @@ export class GameEngine {
     GraphicsRenderer.drawAnalogSpeedometer(
       ctx,
       54,
-      56,
-      38,
+      125,
+      40,
       this.playerSpeedKmh,
       this.playerCar.topSpeed,
       this.currentGear,

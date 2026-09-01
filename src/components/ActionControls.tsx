@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, Crosshair, Volume2 } from 'lucide-react';
+import { Flame, Crosshair } from 'lucide-react';
 
 interface ActionControlsProps {
   nitroUnlocked: boolean;
@@ -7,9 +7,10 @@ interface ActionControlsProps {
   nitroActive: boolean;
   gunUnlocked: boolean;
   gunAmmo: number;
-  onTriggerNitro: () => void;
-  onTriggerGun: () => void;
-  onTriggerHorn: () => void;
+  onTriggerNitro?: () => void;
+  onNitro?: () => void;
+  onTriggerGun?: () => void;
+  onGun?: () => void;
 }
 
 export const ActionControls: React.FC<ActionControlsProps> = ({
@@ -19,17 +20,21 @@ export const ActionControls: React.FC<ActionControlsProps> = ({
   gunUnlocked,
   gunAmmo,
   onTriggerNitro,
+  onNitro,
   onTriggerGun,
-  onTriggerHorn,
+  onGun,
 }) => {
+  const handleNitro = onTriggerNitro || onNitro || (() => {});
+  const handleGun = onTriggerGun || onGun || (() => {});
+
   return (
-    <div id="action-controls-container" className="flex flex-col gap-2">
+    <div id="action-controls-container" className="flex items-center gap-2">
       {/* Nitro Boost Button */}
       {nitroUnlocked && (
         <button
           id="action-nitro-btn"
           type="button"
-          onClick={onTriggerNitro}
+          onClick={handleNitro}
           disabled={nitroCharges <= 0 || nitroActive}
           className={`w-12 h-12 rounded-2xl border flex flex-col items-center justify-center shadow-lg active:scale-90 transition-all ${
             nitroActive
@@ -51,7 +56,7 @@ export const ActionControls: React.FC<ActionControlsProps> = ({
         <button
           id="action-gun-btn"
           type="button"
-          onClick={onTriggerGun}
+          onClick={handleGun}
           disabled={gunAmmo <= 0}
           className={`w-12 h-12 rounded-2xl border flex flex-col items-center justify-center shadow-lg active:scale-90 transition-all ${
             gunAmmo > 0
@@ -65,17 +70,8 @@ export const ActionControls: React.FC<ActionControlsProps> = ({
           </span>
         </button>
       )}
-
-      {/* Auxiliary Horn Button */}
-      <button
-        id="action-horn-btn"
-        type="button"
-        onClick={onTriggerHorn}
-        className="w-12 h-12 rounded-2xl bg-slate-900/90 border border-slate-700 text-amber-400 flex flex-col items-center justify-center shadow-lg active:scale-90 transition-all hover:bg-slate-800"
-      >
-        <Volume2 className="w-5 h-5" />
-        <span className="text-[9px] font-bold mt-0.5">بوق</span>
-      </button>
     </div>
   );
 };
+
+

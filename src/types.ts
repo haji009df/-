@@ -1,4 +1,12 @@
-export type CharacterId = 'maman_bozorg' | 'khaleh_zahra' | 'khaleh_maryam' | 'amir_mahdi' | 'zandayi' | 'ali';
+export type CharacterId = 
+  | 'mamad' 
+  | 'asghar_banafsheh' 
+  | 'amin_shift' 
+  | 'dj' 
+  | 'mamad_cj' 
+  | 'ferdinand' 
+  | 'farbod' 
+  | 'haj_ali';
 
 export interface CharacterData {
   id: CharacterId;
@@ -47,7 +55,7 @@ export interface CarData {
   acceleration: number;
   handling: number;
   armor: number;
-  type: 'sedan' | 'hatchback' | 'pickup' | 'police' | 'taxi' | 'sports' | 'suv' | 'muscle' | 'classic' | 'hyper';
+  type: 'sedan' | 'hatchback' | 'pickup' | 'police' | 'taxi' | 'sports' | 'suv' | 'muscle' | 'classic' | 'hyper' | 'f1' | 'bike' | 'bicycle' | 'jet';
   unlockedByDefault: boolean;
 }
 
@@ -92,6 +100,8 @@ export interface GameSaveData {
   highScore: number;
   overtakenCount: number;
   carCustomizations?: Record<number, CarCustomization>;
+  unlockedCustomizations?: string[];
+  aparatRewardClaimed?: boolean;
 }
 
 export interface PooledParticle {
@@ -135,7 +145,9 @@ export type NpcCarType =
   | 'paykan' 
   | 'pride' 
   | 'nissan_blue' 
-  | 'tanker';
+  | 'tanker'
+  | 'police'
+  | 'pickup';
 
 export interface PooledTrafficCar {
   active: boolean;
@@ -182,7 +194,9 @@ export type RoadItemType =
   | 'palm' 
   | 'neonSign' 
   | 'flower' 
-  | 'signpost';
+  | 'signpost'
+  | 'star'
+  | 'sponsorSign';
 
 export interface PooledRoadItem {
   active: boolean;
@@ -204,5 +218,16 @@ export interface StageMilestoneInfo {
   maxLives: number;
   nitroMaxCharges: number;
   gunMaxAmmo: number;
+}
+
+export interface StoryChapter {
+  id: number;
+  stageTrigger: number;
+  titleFa: string;
+  subtitleFa: string;
+  speakerFa: string;
+  avatarColor: string;
+  messageFa: string;
+  objectiveFa: string;
 }
 

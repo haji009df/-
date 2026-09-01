@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { GameEngine } from './game/gameEngine';
 import { audioManager } from './game/audio';
-import { CARS, CHARACTERS, BIOMES, getBiomeForStage, loadGameSave, saveGameSave } from './game/constants';
-import { CarCustomization, CarData, CharacterData, GameSaveData } from './types';
+import { CARS, CHARACTERS, BIOMES, getBiomeForStage, getStoryChapterForStage, loadGameSave, saveGameSave } from './game/constants';
+import { CarCustomization, CarData, CharacterData, GameSaveData, StoryChapter } from './types';
 import { TopHUD } from './components/TopHUD';
 import { SteeringWheel } from './components/SteeringWheel';
 import { GearShifter } from './components/GearShifter';
@@ -11,8 +11,9 @@ import { GarageModal } from './components/GarageModal';
 import { CarCustomizationModal } from './components/CarCustomizationModal';
 import { CharacterSelectModal } from './components/CharacterSelectModal';
 import { StageSelectModal } from './components/StageSelectModal';
+import { StoryModal } from './components/StoryModal';
 import { MainMenu } from './components/MainMenu';
-import { RotateCcw, Home, Play, Volume2, VolumeX, Award } from 'lucide-react';
+import { RotateCcw, Home, Play, Volume2, VolumeX, Award, Sparkles } from 'lucide-react';
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,6 +26,7 @@ export default function App() {
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isBraking, setIsBraking] = useState<boolean>(false);
 
   // Active Game State Readouts (synced from engine)
   const [currentStage, setCurrentStage] = useState<number>(1);
@@ -48,6 +50,8 @@ export default function App() {
   const [customizingCar, setCustomizingCar] = useState<CarData | null>(null);
   const [isCharactersOpen, setIsCharactersOpen] = useState<boolean>(false);
   const [isStagesOpen, setIsStagesOpen] = useState<boolean>(false);
+  const [isStoryOpen, setIsStoryOpen] = useState<boolean>(false);
+  const [activeStoryChapter, setActiveStoryChapter] = useState<StoryChapter | null>(null);
 
   // Initialize Game Engine
   useEffect(() => {
@@ -84,6 +88,12 @@ export default function App() {
 
     engine.onStageClear = (stage, bonus) => {
       setSaveData({ ...engine.saveData });
+      // Check if next stage has a story chapter
+      const chapter = getStoryChapterForStage(stage + 1);
+      if (chapter) {
+        setActiveStoryChapter(chapter);
+        setIsStoryOpen(true);
+      }
     };
 
     // Resize Observer for responsive canvas sizing
@@ -97,8 +107,49 @@ export default function App() {
     window.addEventListener('resize', updateSize);
     updateSize();
 
+    // Keyboard Shortcuts for full PC responsiveness
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!engineRef.current || engineRef.current.isGameOver) return;
+
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        engineRef.current.setSteering(-1);
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        engineRef.current.setSteering(1);
+      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S' || e.key === ' ') {
+        engineRef.current.setBraking(true);
+        setIsBraking(true);
+      } else if (e.key === 'Shift' || e.key === 'n' || e.key === 'N') {
+        engineRef.current.triggerNitro();
+      } else if (e.key === 'f' || e.key === 'F' || e.key === 'Enter') {
+        engineRef.current.triggerGun();
+      } else if (e.key === 'h' || e.key === 'H' || e.key === 'b' || e.key === 'B') {
+        engineRef.current.triggerHorn();
+      } else if (e.key === '1') {
+        engineRef.current.shiftGear(1);
+      } else if (e.key === '2') {
+        engineRef.current.shiftGear(2);
+      } else if (e.key === '3') {
+        engineRef.current.shiftGear(3);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (!engineRef.current) return;
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        engineRef.current.setSteering(0);
+      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S' || e.key === ' ') {
+        engineRef.current.setBraking(false);
+        setIsBraking(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
     return () => {
       window.removeEventListener('resize', updateSize);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
       engine.isRunning = false;
     };
   }, []);
@@ -129,6 +180,13 @@ export default function App() {
   const handleShiftGear = (gear: number) => {
     if (engineRef.current) {
       engineRef.current.shiftGear(gear);
+    }
+  };
+
+  const handleBrake = (braking: boolean) => {
+    setIsBraking(braking);
+    if (engineRef.current) {
+      engineRef.current.setBraking(braking);
     }
   };
 
@@ -220,16 +278,33 @@ export default function App() {
     setIsCustomizationOpen(true);
   };
 
-  const handleSaveCustomization = (carId: number, custom: CarCustomization) => {
+  const handleSaveCustomization = (
+    carId: number,
+    custom: CarCustomization,
+    cost: number,
+    newUnlockedKeys: string[]
+  ) => {
     const updatedCustomizations = {
       ...(saveData.carCustomizations || {}),
       [carId]: custom,
     };
+    const currentUnlocked = saveData.unlockedCustomizations || [
+      'decal:none',
+      'tint:0',
+      'underglow:none',
+      'spoiler:none',
+      'rim:stock',
+    ];
+    const uniqueUnlocked = Array.from(new Set([...currentUnlocked, ...newUnlockedKeys]));
+
     const updated: GameSaveData = {
       ...saveData,
+      coins: Math.max(0, saveData.coins - cost),
       carCustomizations: updatedCustomizations,
+      unlockedCustomizations: uniqueUnlocked,
     };
     setSaveData(updated);
+    setCoins(updated.coins);
     saveGameSave(updated);
     if (engineRef.current) {
       engineRef.current.saveData = updated;
@@ -267,6 +342,22 @@ export default function App() {
     if (engineRef.current) {
       engineRef.current.setStage(stageNum);
     }
+  };
+
+  const handleClaimAparatReward = () => {
+    if (saveData.aparatRewardClaimed) return;
+    const updated: GameSaveData = {
+      ...saveData,
+      coins: saveData.coins + 500,
+      aparatRewardClaimed: true,
+    };
+    setSaveData(updated);
+    setCoins(updated.coins);
+    saveGameSave(updated);
+    if (engineRef.current) {
+      engineRef.current.saveData = updated;
+    }
+    audioManager.playCoin();
   };
 
   return (
@@ -309,19 +400,21 @@ export default function App() {
               />
             </div>
 
-            {/* Bottom Controls Area (Steering, Gearbox, Horn, Nitro, Gun) */}
+            {/* Bottom Controls Area (Steering, Gearbox, Horn, Nitro, Gun, Brake) */}
             <div className="pointer-events-auto flex items-end justify-between gap-2 pb-2">
               {/* Left Column: Steering Wheel */}
               <div className="flex-1 flex justify-start items-center">
-                <SteeringWheel onSteer={handleSteer} />
+                <SteeringWheel onSteer={handleSteer} onHorn={handleHorn} />
               </div>
 
-              {/* Center Action Controls (Horn, Nitro, Gun) */}
+              {/* Center Action Controls (Brake, Nitro, Gun, Horn) */}
               <div className="flex flex-col items-center">
                 <ActionControls
                   onHorn={handleHorn}
                   onNitro={handleNitro}
                   onGun={handleGun}
+                  onBrake={handleBrake}
+                  isBraking={isBraking}
                   nitroCharges={nitroCharges}
                   nitroActive={nitroActive}
                   nitroUnlocked={nitroUnlocked}
@@ -349,13 +442,27 @@ export default function App() {
             selectedCarName={selectedCar.nameFa}
             selectedCharacterName={selectedCharacter.nameFa}
             isMuted={isMuted}
+            aparatRewardClaimed={saveData.aparatRewardClaimed}
             onStartGame={handleStartGame}
             onOpenGarage={() => setIsGarageOpen(true)}
             onOpenCharacters={() => setIsCharactersOpen(true)}
             onOpenStages={() => setIsStagesOpen(true)}
+            onOpenStory={() => {
+              setActiveStoryChapter(getStoryChapterForStage(1) || null);
+              setIsStoryOpen(true);
+            }}
             onToggleMute={handleToggleMute}
+            onClaimAparatReward={handleClaimAparatReward}
           />
         )}
+
+        {/* Story Modal Dialog */}
+        <StoryModal
+          isOpen={isStoryOpen}
+          activeChapter={activeStoryChapter}
+          currentStage={currentStage}
+          onClose={() => setIsStoryOpen(false)}
+        />
 
         {/* Pause Modal Overlay */}
         {isPaused && !isGameOver && (
@@ -479,6 +586,8 @@ export default function App() {
             isOpen={isCustomizationOpen}
             car={customizingCar}
             customization={saveData.carCustomizations?.[customizingCar.id]}
+            currentCoins={saveData.coins}
+            unlockedCustomizations={saveData.unlockedCustomizations}
             onSaveCustomization={handleSaveCustomization}
             onClose={() => setIsCustomizationOpen(false)}
           />
@@ -506,3 +615,4 @@ export default function App() {
     </main>
   );
 }
+

@@ -23,11 +23,11 @@ export class GraphicsRenderer {
     ctx.save();
     ctx.translate(x, y);
 
-    // Outer Chrome Bezel
+    // Outer Gold Bezel
     const bezelGrad = ctx.createLinearGradient(-radius, -radius, radius, radius);
-    bezelGrad.addColorStop(0, '#64748b');
-    bezelGrad.addColorStop(0.5, '#1e293b');
-    bezelGrad.addColorStop(1, '#0f172a');
+    bezelGrad.addColorStop(0, '#facc15');
+    bezelGrad.addColorStop(0.5, '#ca8a04');
+    bezelGrad.addColorStop(1, '#713f12');
 
     ctx.beginPath();
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -36,7 +36,7 @@ export class GraphicsRenderer {
     ctx.lineWidth = 3;
     ctx.strokeStyle = rgbMode 
       ? `hsl(${(frameTime * 80) % 360}, 90%, 65%)` 
-      : '#38bdf8';
+      : '#fde047';
     ctx.stroke();
 
     // Dial Face
@@ -347,6 +347,56 @@ export class GraphicsRenderer {
         ctx.fillStyle = melonColors[i % melonColors.length];
         ctx.fill();
       }
+    } else if (car.type === 'f1') {
+      // Formula 1: Extremely sleek, pointed nose, huge rear wing
+      ctx.moveTo(0, -h / 2 - 12);
+      ctx.lineTo(w / 3, -h / 4);
+      ctx.lineTo(w / 2 + 6, h / 2 - 8);
+      ctx.lineTo(-w / 2 - 6, h / 2 - 8);
+      ctx.lineTo(-w / 3, -h / 4);
+      ctx.closePath();
+      ctx.fill();
+      // Rear Wing
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-w / 2 - 8, h / 2 - 14, w + 16, 6);
+    } else if (car.type === 'bike') {
+      // Motorcycle: Very narrow and slim body
+      ctx.roundRect(-6, -h / 2, 12, h, 6);
+      ctx.fill();
+      // Rider helmet
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(0, -6, 7, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (car.type === 'bicycle') {
+      // Bicycle: Extremely slim open frame
+      ctx.strokeStyle = bodyColor;
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -h / 2 + 8);
+      ctx.lineTo(0, h / 2 - 8);
+      ctx.stroke();
+      // Rider
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(0, -2, 5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (car.type === 'jet') {
+      // Jet Car: Fighter supersonic nose cone & delta wings
+      ctx.moveTo(0, -h / 2 - 18);
+      ctx.lineTo(w / 2 + 10, h / 2 - 6);
+      ctx.lineTo(0, h / 2);
+      ctx.lineTo(-w / 2 - 10, h / 2 - 6);
+      ctx.closePath();
+      ctx.fill();
+      // Afterburner flame
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(-6, h / 2);
+      ctx.lineTo(0, h / 2 + 20);
+      ctx.lineTo(6, h / 2);
+      ctx.closePath();
+      ctx.fill();
     } else if (car.type === 'hyper' || car.type === 'sports') {
       ctx.moveTo(0, -h / 2);
       ctx.quadraticCurveTo(w / 2 + 2, -h / 2 + 10, w / 2, h / 2 - 8);
@@ -657,6 +707,53 @@ export class GraphicsRenderer {
       ctx.lineTo(-5, h / 2 - 9);
       ctx.closePath();
       ctx.fill();
+    } else if (npc.type === 'police') {
+      // Iranian Police Cruiser (ماشین پلیس با آژیر گردان)
+      ctx.fillStyle = '#1e3a8a'; // Deep Navy
+      ctx.beginPath();
+      ctx.roundRect(-w / 2, -h / 2, w, h, 6);
+      ctx.fill();
+
+      // White doors stripe
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-w / 2, -6, w, 14);
+
+      // Police Text
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('POLICE', 0, 1);
+
+      // Windshield
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-w / 2 + 3, -h / 2 + 10, w - 6, 10);
+      ctx.fillRect(-w / 2 + 3, h / 2 - 18, w - 6, 8);
+
+      // Flashing Siren Light Bar on roof
+      const isRedFlash = Math.sin(npc.sirenTime * 15) > 0;
+      ctx.fillStyle = isRedFlash ? '#ef4444' : '#38bdf8';
+      ctx.beginPath();
+      ctx.roundRect(-8, -4, 16, 5, 2);
+      ctx.fill();
+    } else if (npc.type === 'pickup') {
+      // Pickup Truck (وانت بار)
+      ctx.fillStyle = npc.color || '#15803d';
+      ctx.beginPath();
+      // Cab
+      ctx.roundRect(-w / 2, -h / 2, w, 28, 4);
+      ctx.fill();
+
+      // Rear Open Cargo Bed
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(-w / 2 + 2, -h / 2 + 30, w - 4, h - 32);
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(-w / 2 + 2, -h / 2 + 30, w - 4, h - 32);
+
+      // Windshield
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-w / 2 + 3, -h / 2 + 6, w - 6, 12);
     } else if (npc.type === 'snowplow') {
       // Heavy Alpine Snowplow Truck (ماشین برف‌روب زرد)
       ctx.fillStyle = '#eab308'; // Safety Yellow
@@ -943,13 +1040,39 @@ export class GraphicsRenderer {
       ctx.lineTo(-3.5, -2);
       ctx.closePath();
       ctx.fill();
+    } else if (type === 'sponsorSign') {
+      // Roadside Sponsor Billboard / House for ShahinEdu Aparat Channel
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.fillRect(-24, 6, 48, 10);
+
+      // Billboard Structure (Gold/Amber Theme)
+      const signGrad = ctx.createLinearGradient(-22, -22, 22, 22);
+      signGrad.addColorStop(0, '#f59e0b');
+      signGrad.addColorStop(1, '#b45309');
+      ctx.fillStyle = signGrad;
+      ctx.beginPath();
+      ctx.roundRect(-22, -22, 44, 30, 4);
+      ctx.fill();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Sign text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 7px Vazirmatn, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('کانال آپارات', 0, -10);
+      ctx.fillStyle = '#fef08a';
+      ctx.font = 'bold 8px Vazirmatn, sans-serif';
+      ctx.fillText('شاهین آموز', 0, 2);
     }
 
     ctx.restore();
   }
 
   /**
-   * Draw Highway & Environment Biome Shading with Rich Map Details
+   * Draw Highway & Environment Biome Shading with Rich Map Details and Curving Road
    */
   public static drawRoadEnvironment(
     ctx: CanvasRenderingContext2D,
@@ -957,29 +1080,74 @@ export class GraphicsRenderer {
     canvasHeight: number,
     biome: BiomeConfig,
     roadScrollY: number,
-    roadLeftX: number,
+    baseRoadLeftX: number,
     roadWidth: number,
-    laneCount: number = 3
+    laneCount: number = 3,
+    curveFn?: (y: number) => number
   ): void {
     // 1. Biome Grass / Terrain Background
     ctx.fillStyle = biome.grassColor;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
+    const stripH = 24;
+    const getCurve = (y: number) => (curveFn ? curveFn(y) : 0);
+
     // 2. Rich Side Scenery Details based on Biome
-    if (biome.id === 'forest') {
+    if (biome.id === 'noir' || biome.id === 'mountain' || biome.id === 'paradise') {
+      // Blue Modern Apartments and Swimming Pools along roadside!
+      for (let y = -120; y < canvasHeight + 120; y += 140) {
+        const offset = (roadScrollY + y) % (canvasHeight + 240) - 120;
+        const curCurve = getCurve(offset);
+        const rLeft = baseRoadLeftX + curCurve;
+
+        // Left Blue Apartment Building
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(rLeft - 52, offset, 36, 64);
+        ctx.strokeStyle = '#0369a1';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(rLeft - 52, offset, 36, 64);
+
+        // Apartment windows grid (lit yellow/white)
+        ctx.fillStyle = '#fef08a';
+        for (let rw = 0; rw < 3; rw++) {
+          for (let cl = 0; cl < 3; cl++) {
+            ctx.fillRect(rLeft - 46 + cl * 10, offset + 8 + rw * 16, 6, 10);
+          }
+        }
+
+        // Right Swimming Pool & Palm Tree
+        ctx.fillStyle = '#38bdf8'; // Pool water
+        ctx.beginPath();
+        ctx.roundRect(rLeft + roadWidth + 16, offset + 20, 40, 24, 6);
+        ctx.fill();
+        ctx.strokeStyle = '#bae6fd';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Palm tree near pool
+        ctx.fillStyle = '#78350f'; // Trunk
+        ctx.fillRect(rLeft + roadWidth + 64, offset + 15, 5, 30);
+        ctx.fillStyle = '#15803d'; // Leaves
+        ctx.beginPath();
+        ctx.arc(rLeft + roadWidth + 66, offset + 12, 14, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (biome.id === 'forest') {
       // Dense roadside pine trees & shrubs
       ctx.fillStyle = '#14532d';
       for (let y = -80; y < canvasHeight + 80; y += 70) {
         const offset = (roadScrollY + y) % (canvasHeight + 160) - 80;
+        const curCurve = getCurve(offset);
+        const rLeft = baseRoadLeftX + curCurve;
         // Left trees
         ctx.beginPath();
-        ctx.arc(roadLeftX - 28, offset, 16, 0, Math.PI * 2);
-        ctx.arc(roadLeftX - 16, offset + 12, 12, 0, Math.PI * 2);
+        ctx.arc(rLeft - 28, offset, 16, 0, Math.PI * 2);
+        ctx.arc(rLeft - 16, offset + 12, 12, 0, Math.PI * 2);
         ctx.fill();
         // Right trees
         ctx.beginPath();
-        ctx.arc(roadLeftX + roadWidth + 28, offset + 35, 16, 0, Math.PI * 2);
-        ctx.arc(roadLeftX + roadWidth + 16, offset + 47, 12, 0, Math.PI * 2);
+        ctx.arc(rLeft + roadWidth + 28, offset + 35, 16, 0, Math.PI * 2);
+        ctx.arc(rLeft + roadWidth + 16, offset + 47, 12, 0, Math.PI * 2);
         ctx.fill();
       }
     } else if (biome.id === 'desert') {
@@ -987,47 +1155,51 @@ export class GraphicsRenderer {
       ctx.fillStyle = '#15803d';
       for (let y = -100; y < canvasHeight + 100; y += 120) {
         const offset = (roadScrollY + y) % (canvasHeight + 200) - 100;
+        const curCurve = getCurve(offset);
+        const rLeft = baseRoadLeftX + curCurve;
         // Left Cactus
-        ctx.fillRect(roadLeftX - 24, offset, 5, 22);
-        ctx.fillRect(roadLeftX - 30, offset + 6, 14, 4);
-        ctx.fillRect(roadLeftX - 30, offset + 2, 4, 8);
-        ctx.fillRect(roadLeftX - 20, offset + 4, 4, 8);
+        ctx.fillRect(rLeft - 24, offset, 5, 22);
+        ctx.fillRect(rLeft - 30, offset + 6, 14, 4);
+        ctx.fillRect(rLeft - 30, offset + 2, 4, 8);
+        ctx.fillRect(rLeft - 20, offset + 4, 4, 8);
       }
     } else if (biome.id === 'rain') {
-      // Wet reflective asphalt & Highway overhead gantry signs
+      // Wet reflective asphalt & Highway puddles
       ctx.fillStyle = '#0284c7';
-      ctx.fillRect(0, 0, roadLeftX - 10, canvasHeight);
-      ctx.fillRect(roadLeftX + roadWidth + 10, 0, canvasWidth, canvasHeight);
+      for (let y = 0; y < canvasHeight; y += stripH) {
+        const c1 = getCurve(y);
+        const c2 = getCurve(y + stripH);
+        const r1 = baseRoadLeftX + c1;
+        const r2 = baseRoadLeftX + c2;
+        ctx.fillRect(0, y, Math.max(0, r1 - 8), stripH);
+        ctx.fillRect(r1 + roadWidth + 8, y, canvasWidth, stripH);
+      }
     } else if (biome.id === 'snow') {
       // Snow banks along road edges
       ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(roadLeftX - 20, 0, 14, canvasHeight);
-      ctx.fillRect(roadLeftX + roadWidth + 6, 0, 14, canvasHeight);
-    } else if (biome.id === 'noir') {
-      // Tehran Night: Glowing street lampposts casting light cones
-      for (let y = -150; y < canvasHeight + 150; y += 160) {
-        const offset = (roadScrollY + y) % (canvasHeight + 300) - 150;
-        // Lamppost Glow on left
-        const lampGrad = ctx.createRadialGradient(roadLeftX - 8, offset, 4, roadLeftX - 8, offset, 40);
-        lampGrad.addColorStop(0, 'rgba(254, 240, 138, 0.4)');
-        lampGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
-        ctx.fillStyle = lampGrad;
-        ctx.beginPath();
-        ctx.arc(roadLeftX - 8, offset, 40, 0, Math.PI * 2);
-        ctx.fill();
+      for (let y = 0; y < canvasHeight; y += stripH) {
+        const c = getCurve(y);
+        const r = baseRoadLeftX + c;
+        ctx.fillRect(r - 20, y, 14, stripH);
+        ctx.fillRect(r + roadWidth + 6, y, 14, stripH);
       }
     } else if (biome.id === 'ocean') {
-      // Ocean water waves on left/right
+      // Ocean water waves on left/right & palm trees
       ctx.fillStyle = '#0284c7';
-      ctx.fillRect(0, 0, roadLeftX, canvasHeight);
-      ctx.fillRect(roadLeftX + roadWidth, 0, canvasWidth - (roadLeftX + roadWidth), canvasHeight);
-      // Palm Trees
+      for (let y = 0; y < canvasHeight; y += stripH) {
+        const c = getCurve(y);
+        const r = baseRoadLeftX + c;
+        ctx.fillRect(0, y, Math.max(0, r), stripH);
+        ctx.fillRect(r + roadWidth, y, Math.max(0, canvasWidth - (r + roadWidth)), stripH);
+      }
       ctx.fillStyle = '#166534';
       for (let y = -100; y < canvasHeight + 100; y += 140) {
         const offset = (roadScrollY + y) % (canvasHeight + 200) - 100;
+        const c = getCurve(offset);
+        const rLeft = baseRoadLeftX + c;
         ctx.beginPath();
-        ctx.arc(roadLeftX - 22, offset, 14, 0, Math.PI * 2);
-        ctx.arc(roadLeftX + roadWidth + 22, offset + 70, 14, 0, Math.PI * 2);
+        ctx.arc(rLeft - 22, offset, 14, 0, Math.PI * 2);
+        ctx.arc(rLeft + roadWidth + 22, offset + 70, 14, 0, Math.PI * 2);
         ctx.fill();
       }
     } else if (biome.id === 'lava') {
@@ -1054,25 +1226,56 @@ export class GraphicsRenderer {
       }
     }
 
-    // 3. Road Asphalt Surface
-    ctx.fillStyle = biome.roadColor;
-    ctx.fillRect(roadLeftX, 0, roadWidth, canvasHeight);
 
-    // 4. Red & White Striped Road Curbs
+    // 3. Road Asphalt Surface (Trapezoidal Slices for Curves)
+    ctx.fillStyle = biome.roadColor;
+    for (let y = 0; y < canvasHeight; y += stripH) {
+      const yNext = Math.min(canvasHeight, y + stripH);
+      const rx1 = baseRoadLeftX + getCurve(y);
+      const rx2 = baseRoadLeftX + getCurve(yNext);
+
+      ctx.beginPath();
+      ctx.moveTo(rx1, y);
+      ctx.lineTo(rx1 + roadWidth, y);
+      ctx.lineTo(rx2 + roadWidth, yNext);
+      ctx.lineTo(rx2, yNext);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 4. Red & White Striped Road Curbs (Curved)
     const curbW = 8;
     const curbSegmentH = 28;
     const curbOffset = roadScrollY % (curbSegmentH * 2);
 
-    for (let y = -curbSegmentH * 2; y < canvasHeight + curbSegmentH * 2; y += curbSegmentH) {
+    for (let y = 0; y < canvasHeight; y += stripH) {
+      const yNext = Math.min(canvasHeight, y + stripH);
+      const rx1 = baseRoadLeftX + getCurve(y);
+      const rx2 = baseRoadLeftX + getCurve(yNext);
+
       const isAlt = Math.floor((y + curbOffset) / curbSegmentH) % 2 === 0;
       ctx.fillStyle = isAlt ? biome.curbColor1 : biome.curbColor2;
+
       // Left curb
-      ctx.fillRect(roadLeftX - curbW, y + curbOffset, curbW, curbSegmentH);
+      ctx.beginPath();
+      ctx.moveTo(rx1 - curbW, y);
+      ctx.lineTo(rx1, y);
+      ctx.lineTo(rx2, yNext);
+      ctx.lineTo(rx2 - curbW, yNext);
+      ctx.closePath();
+      ctx.fill();
+
       // Right curb
-      ctx.fillRect(roadLeftX + roadWidth, y + curbOffset, curbW, curbSegmentH);
+      ctx.beginPath();
+      ctx.moveTo(rx1 + roadWidth, y);
+      ctx.lineTo(rx1 + roadWidth + curbW, y);
+      ctx.lineTo(rx2 + roadWidth + curbW, yNext);
+      ctx.lineTo(rx2 + roadWidth, yNext);
+      ctx.closePath();
+      ctx.fill();
     }
 
-    // 5. Dashed Lane Dividers with Cat-Eye Reflectors
+    // 5. Dashed Lane Dividers with Cat-Eye Reflectors (Curved)
     const laneW = roadWidth / laneCount;
     const dashH = 36;
     const gapH = 28;
@@ -1081,14 +1284,30 @@ export class GraphicsRenderer {
 
     ctx.fillStyle = biome.laneColor;
     for (let l = 1; l < laneCount; l++) {
-      const lx = roadLeftX + l * laneW - 2;
       for (let y = -totalDashH; y < canvasHeight + totalDashH; y += totalDashH) {
-        ctx.fillRect(lx, y + dashOffset, 4, dashH);
+        const topY = y + dashOffset;
+        const botY = topY + dashH;
+        if (botY < 0 || topY > canvasHeight) continue;
+
+        const cTop = getCurve(topY);
+        const cBot = getCurve(botY);
+        const lxTop = baseRoadLeftX + cTop + l * laneW - 2;
+        const lxBot = baseRoadLeftX + cBot + l * laneW - 2;
+
+        ctx.fillStyle = biome.laneColor;
+        ctx.beginPath();
+        ctx.moveTo(lxTop, topY);
+        ctx.lineTo(lxTop + 4, topY);
+        ctx.lineTo(lxBot + 4, botY);
+        ctx.lineTo(lxBot, botY);
+        ctx.closePath();
+        ctx.fill();
 
         // Small amber cat-eye reflector in the gap
+        const midY = topY + dashH + gapH / 2;
+        const midC = getCurve(midY);
         ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(lx + 1, y + dashOffset + dashH + gapH / 2 - 2, 2, 4);
-        ctx.fillStyle = biome.laneColor;
+        ctx.fillRect(baseRoadLeftX + midC + l * laneW - 1, midY - 2, 2, 4);
       }
     }
 
@@ -1097,15 +1316,18 @@ export class GraphicsRenderer {
     const markOffset = roadScrollY % markerPeriod;
     for (let y = -markerPeriod; y < canvasHeight + markerPeriod; y += markerPeriod) {
       const my = y + markOffset;
+      const curC = getCurve(my);
+      const curLeft = baseRoadLeftX + curC;
+
       // Highway Speed Limit '110' on middle lane
       ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
       ctx.font = 'bold 22px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('110', roadLeftX + roadWidth / 2, my);
+      ctx.fillText('110', curLeft + roadWidth / 2, my);
 
       // Forward arrow on right lane
       ctx.beginPath();
-      const ax = roadLeftX + laneW * 0.5;
+      const ax = curLeft + laneW * 0.5;
       ctx.moveTo(ax, my - 60);
       ctx.lineTo(ax - 8, my - 45);
       ctx.lineTo(ax - 3, my - 45);

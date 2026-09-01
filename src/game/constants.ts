@@ -2,14 +2,15 @@ import { BiomeConfig, CarData, CharacterData, GameSaveData, StageMilestoneInfo }
 
 export const CHARACTERS: CharacterData[] = [
   {
-    id: 'maman_bozorg',
-    nameFa: 'مامان بزرگ',
-    nameEn: 'Maman Bozorg',
-    avatarColor: '#ec4899',
-    role: 'راننده مهربان و محتاط',
-    description: 'کاراکتر رایگان و آغازین. سرعت استاندارد، کنترل راحت و دست‌فرمان نرم.',
+    id: 'mamad',
+    nameFa: 'ممد',
+    nameEn: 'Mamad',
+    avatarColor: '#3b82f6',
+    role: 'رفیق فابریک غفلت و راننده جسور',
+    description: 'کاراکتر آغازین و باوفا. مصمم برای رساندن خود به زندان قلعه‌نو و نجات غفلت. هندلینگ روان و تعادل عالی.',
     unlockedByDefault: true,
     price: 0,
+    quoteFa: '«تا غفلت رو از قلعه‌نو نجات ندم، پامو از رو گاز برنمیدارم!»',
     perks: {
       speedMultiplier: 1.0,
       coinMultiplier: 1.0,
@@ -20,91 +21,134 @@ export const CHARACTERS: CharacterData[] = [
     },
   },
   {
-    id: 'khaleh_zahra',
-    nameFa: 'خاله زهرا',
-    nameEn: 'Khaleh Zahra',
-    avatarColor: '#f59e0b',
-    role: 'برکت‌دار و سکه‌جمع‌کن',
-    description: 'سرعت حداکثر کمی آرام‌تر (-۱۰٪)، اما ضریب دریافت سکه‌ها دو برابر (۲x) است!',
+    id: 'asghar_banafsheh',
+    nameFa: 'اصغر بنفش',
+    nameEn: 'Asghar Banafsheh',
+    avatarColor: '#a855f7',
+    role: 'سلطان بنفش و آهن‌ربای سکه',
+    description: 'عاشق رنگ بنفش و تودوزی لوکس! ضریب دریافت سکه‌ها ۲ برابر (۲x) و دارای نورپردازی بنفش زیر ماشین.',
     unlockedByDefault: false,
     price: 250,
-    perks: {
-      speedMultiplier: 0.9,
-      coinMultiplier: 2.0,
-      handlingMultiplier: 1.05,
-      extraLives: 0,
-      hasDrift: false,
-      hasRgbLights: false,
-    },
-  },
-  {
-    id: 'khaleh_maryam',
-    nameFa: 'خاله مریم',
-    nameEn: 'Khaleh Maryam',
-    avatarColor: '#10b981',
-    role: 'فرمان‌داری تیز و دقیق',
-    description: 'دست‌فرمان فوق‌العاده تیز و دقیق (+۳۰٪ چسبندگی و مانور سریع بین خطوط اتوبان).',
-    unlockedByDefault: false,
-    price: 500,
+    quoteFa: '«رنگ بنفش نشانه اصالته، سکه‌ها خودشون جذب ماشینم میشن!»',
     perks: {
       speedMultiplier: 1.05,
-      coinMultiplier: 1.1,
-      handlingMultiplier: 1.35,
+      coinMultiplier: 2.0,
+      handlingMultiplier: 1.1,
       extraLives: 0,
       hasDrift: false,
-      hasRgbLights: false,
+      hasRgbLights: true,
     },
   },
   {
-    id: 'amir_mahdi',
-    nameFa: 'امیر مهدی',
-    nameEn: 'Amir Mahdi',
-    avatarColor: '#3b82f6',
-    role: 'سلاطین لایی‌کشی و دریفت',
-    description: 'سرعت بالا (+۱۵٪) و امکان دریفت‌زدن در پیچ‌ها و تغییر خط‌های تند با خط ترمز جذاب.',
+    id: 'amin_shift',
+    nameFa: 'امین شیفت',
+    nameEn: 'Amin Shift',
+    avatarColor: '#10b981',
+    role: 'استاد تعویض دنده و کلاچ‌گیری',
+    description: 'شتاب اولیه وحشتناک (+۲۰٪ شتاب و سرعت)، دست‌فرمان فوق‌العاده تیز برای لایی‌کشی بین موانع.',
     unlockedByDefault: false,
-    price: 1000,
+    price: 500,
+    quoteFa: '«شیفت زدن من صدم ثانیه‌ست، هیچ ماشینی به گرد پایم نمیرسه!»',
     perks: {
-      speedMultiplier: 1.18,
-      coinMultiplier: 1.25,
-      handlingMultiplier: 1.15,
+      speedMultiplier: 1.15,
+      coinMultiplier: 1.1,
+      handlingMultiplier: 1.35,
       extraLives: 0,
       hasDrift: true,
       hasRgbLights: false,
     },
   },
   {
-    id: 'zandayi',
-    nameFa: 'زندایی',
-    nameEn: 'Zandayi',
-    avatarColor: '#a855f7',
-    role: 'نورپردازی رنگین‌کمانی RGB',
-    description: 'ضریب سکه نصف (۰.۵x) می‌شود، اما چراغ‌های جلو و زیر ماشین افکت نئونی RGB متحرک دارند!',
+    id: 'dj',
+    nameFa: 'DJ (دی‌جی)',
+    nameEn: 'DJ',
+    avatarColor: '#ec4899',
+    role: 'هیولای بیس و چراغ‌های RGB نئونی',
+    description: 'سیستم صوتی زلزله! چراغ‌های جلو و زیر خودرو نورپردازی رقصان هفت‌رنگ RGB دارند و ۱ جان اضافی دارد.',
     unlockedByDefault: false,
-    price: 1800,
+    price: 900,
+    quoteFa: '«بیس سیستم ماشین من موانع اتوبان رو به لرزه درمیاره!»',
     perks: {
-      speedMultiplier: 1.1,
-      coinMultiplier: 0.5,
-      handlingMultiplier: 1.1,
+      speedMultiplier: 1.12,
+      coinMultiplier: 1.3,
+      handlingMultiplier: 1.15,
       extraLives: 1,
       hasDrift: false,
       hasRgbLights: true,
     },
   },
   {
-    id: 'ali',
-    nameFa: 'علی',
-    nameEn: 'Ali',
-    avatarColor: '#ef4444',
-    role: 'سلطان اتوبان و قهرمان',
-    description: 'گران‌ترین و قوی‌ترین کاراکتر (مرحله ۵۰+ یا ۵۰۰۰ سکه). دارای ۳ جان اضافی و ضریب سکه ۱.۵x!',
+    id: 'mamad_cj',
+    nameFa: 'ممد سی جی',
+    nameEn: 'Mamad CJ',
+    avatarColor: '#eab308',
+    role: 'افسانه سن آندریاس در اتوبان ایران',
+    description: 'زره بدنه قوی، دریفت‌های حرفه‌ای و سرعت بالا (+۱۸٪) با قابلیت جمع‌آوری تیر و نیترو دو برابر.',
     unlockedByDefault: false,
-    price: 5000,
-    minLevelToUnlock: 50,
+    price: 1500,
+    quoteFa: '«Ah shit, here we go again... غفلت داداش اومدم!»',
+    perks: {
+      speedMultiplier: 1.18,
+      coinMultiplier: 1.35,
+      handlingMultiplier: 1.25,
+      extraLives: 1,
+      hasDrift: true,
+      hasRgbLights: false,
+    },
+  },
+  {
+    id: 'ferdinand',
+    nameFa: 'فردیناند',
+    nameEn: 'Ferdinand',
+    avatarColor: '#0284c7',
+    role: 'مهندسی دقیق و سرعت ویرانگر',
+    description: 'سرعت نهایی فوق‌العاده بالا (+۲۵٪ سرعت) و مقاومت بالا در برابر تصادف و ۲ جان اضافه.',
+    unlockedByDefault: false,
+    price: 2400,
+    quoteFa: '«مهندسی دقیق یعنی با سرعت ۲۰۰ تا بدون ترمز از پیچ‌ها رد شی!»',
     perks: {
       speedMultiplier: 1.25,
+      coinMultiplier: 1.4,
+      handlingMultiplier: 1.3,
+      extraLives: 2,
+      hasDrift: true,
+      hasRgbLights: false,
+    },
+  },
+  {
+    id: 'farbod',
+    nameFa: 'فربد',
+    nameEn: 'Farbod',
+    avatarColor: '#f97316',
+    role: 'تک‌تیرانداز اتوبان و متخصص سلاح',
+    description: 'مجهز به تیربار قدرتمند، ظرفیت مهمات بالا، شلیک‌های ویرانگر و تخریب آنی موانع و ۲ جان اضافی.',
+    unlockedByDefault: false,
+    price: 3500,
+    quoteFa: '«مسیر رو با تیربار باز می‌کنم تا غفلت از قلعه‌نو خلاص بشه!»',
+    perks: {
+      speedMultiplier: 1.22,
       coinMultiplier: 1.5,
-      handlingMultiplier: 1.25,
+      handlingMultiplier: 1.2,
+      extraLives: 2,
+      hasDrift: false,
+      hasRgbLights: true,
+    },
+  },
+  {
+    id: 'haj_ali',
+    nameFa: 'حاج علی',
+    nameEn: 'Haj Ali',
+    avatarColor: '#ef4444',
+    role: 'سلطان و پیشکسوت اتوبان‌های کشور',
+    description: 'قدرتمندترین و شکست‌ناپذیرترین کاراکتر! ۳ جان اضافی، ضریب سکه ۲.۵ برابر، سرعت خارق‌العاده و هندلینگ بی‌نظیر.',
+    unlockedByDefault: false,
+    price: 6000,
+    minLevelToUnlock: 30,
+    quoteFa: '«من کل اتوبان‌های ایران رو چشم‌بسته رفتم، قلعه‌نو که جای خود دارد!»',
+    perks: {
+      speedMultiplier: 1.35,
+      coinMultiplier: 2.5,
+      handlingMultiplier: 1.4,
       extraLives: 3,
       hasDrift: true,
       hasRgbLights: true,
@@ -393,7 +437,120 @@ export const CARS: CarData[] = [
     type: 'hyper',
     unlockedByDefault: false,
   },
+  {
+    id: 21,
+    nameFa: 'موتور سنگین هوندا ۱۰۰۰ (سرعتی)',
+    nameEn: 'Superbike 1000cc',
+    price: 1800,
+    bodyColor: '#dc2626',
+    secondaryColor: '#1e293b',
+    topSpeed: 215,
+    acceleration: 98,
+    handling: 96,
+    armor: 30,
+    type: 'sports',
+    unlockedByDefault: false,
+  },
+  {
+    id: 22,
+    nameFa: 'تراکتور غول‌پیکر کشاورزی (قدرتی)',
+    nameEn: 'Heavy Farm Tractor',
+    price: 2200,
+    bodyColor: '#15803d',
+    secondaryColor: '#eab308',
+    topSpeed: 140,
+    acceleration: 60,
+    handling: 55,
+    armor: 100,
+    type: 'suv',
+    unlockedByDefault: false,
+  },
+  {
+    id: 23,
+    nameFa: 'تریلی ۱۸ چرخ جاده‌ای (سلطان بار)',
+    nameEn: '18-Wheeler Freight Truck',
+    price: 3200,
+    bodyColor: '#b45309',
+    secondaryColor: '#334155',
+    topSpeed: 165,
+    acceleration: 50,
+    handling: 45,
+    armor: 100,
+    type: 'sedan',
+    unlockedByDefault: false,
+  },
+  {
+    id: 24,
+    nameFa: 'وانت بار نیسان اسپرت (حامل بار)',
+    nameEn: 'Sport Pickup Van',
+    price: 1500,
+    bodyColor: '#15803d',
+    secondaryColor: '#fef08a',
+    topSpeed: 175,
+    acceleration: 85,
+    handling: 80,
+    armor: 70,
+    type: 'pickup',
+    unlockedByDefault: false,
+  },
+  {
+    id: 25,
+    nameFa: 'ماشین فرمول یک حرفه‌ای (سرعت مافوق)',
+    nameEn: 'Pro Formula 1 Racer',
+    price: 4500,
+    bodyColor: '#dc2626',
+    secondaryColor: '#ffffff',
+    topSpeed: 245,
+    acceleration: 100,
+    handling: 98,
+    armor: 50,
+    type: 'f1',
+    unlockedByDefault: false,
+  },
+  {
+    id: 26,
+    nameFa: 'موتور سنگین مسابقه‌ای (تک‌چرخ‌زن)',
+    nameEn: 'Racing Superbike',
+    price: 2000,
+    bodyColor: '#2563eb',
+    secondaryColor: '#93c5fd',
+    topSpeed: 220,
+    acceleration: 99,
+    handling: 95,
+    armor: 30,
+    type: 'bike',
+    unlockedByDefault: false,
+  },
+  {
+    id: 27,
+    nameFa: 'دوچرخه کورسی فوق‌سبک (استقامتی)',
+    nameEn: 'Pro Racing Bicycle',
+    price: 900,
+    bodyColor: '#eab308',
+    secondaryColor: '#1e293b',
+    topSpeed: 130,
+    acceleration: 75,
+    handling: 92,
+    armor: 15,
+    type: 'bicycle',
+    unlockedByDefault: false,
+  },
+  {
+    id: 28,
+    nameFa: 'جت موشکی جاده‌ای (صاعقه زمینی)',
+    nameEn: 'Jet Rocket Car',
+    price: 8500,
+    bodyColor: '#475569',
+    secondaryColor: '#38bdf8',
+    topSpeed: 255,
+    acceleration: 100,
+    handling: 94,
+    armor: 90,
+    type: 'jet',
+    unlockedByDefault: false,
+  },
 ];
+
 
 export const BIOMES: BiomeConfig[] = [
   {
@@ -410,7 +567,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: false,
     weatherEffect: 'none',
     ambientLight: 1.0,
-    npcTypes: ['paykan', 'pride', 'sedan'],
+    npcTypes: ['paykan', 'pride', 'sedan', 'pickup', 'police'],
   },
   {
     id: 'desert',
@@ -426,7 +583,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: false,
     weatherEffect: 'none',
     ambientLight: 1.0,
-    npcTypes: ['truck', 'tractor', 'nissan_blue', 'semi'],
+    npcTypes: ['truck', 'tractor', 'nissan_blue', 'semi', 'pickup'],
   },
   {
     id: 'rain',
@@ -442,7 +599,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: true,
     weatherEffect: 'rain',
     ambientLight: 0.35,
-    npcTypes: ['sedan', 'tanker', 'ambulance', 'truck'],
+    npcTypes: ['sedan', 'tanker', 'ambulance', 'truck', 'police'],
   },
   {
     id: 'snow',
@@ -458,7 +615,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: false,
     weatherEffect: 'snow',
     ambientLight: 0.9,
-    npcTypes: ['snowplow', 'truck', 'sedan', 'semi'],
+    npcTypes: ['snowplow', 'truck', 'sedan', 'semi', 'police'],
   },
   {
     id: 'noir',
@@ -474,7 +631,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: true,
     weatherEffect: 'none',
     ambientLight: 0.4,
-    npcTypes: ['limo', 'sedan', 'truck', 'paykan'],
+    npcTypes: ['limo', 'sedan', 'truck', 'paykan', 'police'],
   },
   {
     id: 'lava',
@@ -490,7 +647,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: true,
     weatherEffect: 'embers',
     ambientLight: 0.45,
-    npcTypes: ['firetruck', 'truck', 'sports', 'semi'],
+    npcTypes: ['firetruck', 'truck', 'sports', 'semi', 'police'],
   },
   {
     id: 'mountain',
@@ -506,7 +663,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: false,
     weatherEffect: 'none',
     ambientLight: 0.95,
-    npcTypes: ['bus', 'nissan_blue', 'truck', 'sedan'],
+    npcTypes: ['bus', 'nissan_blue', 'truck', 'sedan', 'pickup'],
   },
   {
     id: 'ocean',
@@ -522,7 +679,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: false,
     weatherEffect: 'none',
     ambientLight: 1.0,
-    npcTypes: ['sedan', 'sports', 'bus', 'semi'],
+    npcTypes: ['sedan', 'sports', 'bus', 'semi', 'police'],
   },
   {
     id: 'cyberpunk',
@@ -538,7 +695,7 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: true,
     weatherEffect: 'cyberGrid',
     ambientLight: 0.25,
-    npcTypes: ['cyber', 'sports', 'semi'],
+    npcTypes: ['cyber', 'sports', 'semi', 'police'],
   },
   {
     id: 'paradise',
@@ -554,9 +711,87 @@ export const BIOMES: BiomeConfig[] = [
     nightMode: false,
     weatherEffect: 'petals',
     ambientLight: 1.0,
-    npcTypes: ['limo', 'sports', 'cyber', 'semi'],
+    npcTypes: ['limo', 'sports', 'cyber', 'semi', 'police', 'pickup'],
   },
 ];
+
+export interface StoryChapter {
+  id: number;
+  stageTrigger: number;
+  titleFa: string;
+  subtitleFa: string;
+  speakerFa: string;
+  avatarColor: string;
+  messageFa: string;
+  objectiveFa: string;
+}
+
+export const STORY_CHAPTERS: StoryChapter[] = [
+  {
+    id: 1,
+    stageTrigger: 1,
+    titleFa: 'فصل ۱: خبر ناگوار و آغاز ماجرا',
+    subtitleFa: 'غفلت کجاست؟!',
+    speakerFa: 'ممد',
+    avatarColor: '#3b82f6',
+    messageFa: 'بچه‌ها غفلت رو گرفتن! رئیس باند مافیای جاده، غفلت بهترین دوستمون رو دزدیده و برده به زندان فوق امنیتی «قلعه‌نو»! باید سریع گازشو بگیریم و نجاتش بدیم!',
+    objectiveFa: 'گذر از اتوبان و جمع‌آوری سکه و نیترو برای شروع عملیات نجات غفلت',
+  },
+  {
+    id: 2,
+    stageTrigger: 10,
+    titleFa: 'فصل ۲: کمین‌گاه کویر لوت',
+    subtitleFa: 'نفوذ به قلمرو شن‌های داغ',
+    speakerFa: 'اصغر بنفش',
+    avatarColor: '#a855f7',
+    messageFa: 'رسیدیم به کویر! نوچه‌های مافیا جاده رو با بشکه و مانع بستن. از تیربار و نیترو استفاده کنید تا موانع رو خرد کنیم!',
+    objectiveFa: 'تیراندازی به موانع و ماشین‌های سد معبر',
+  },
+  {
+    id: 3,
+    stageTrigger: 25,
+    titleFa: 'فصل ۳: گردنه‌های لغزنده بارانی',
+    subtitleFa: 'پیچ‌های تند شمال',
+    speakerFa: 'امین شیفت',
+    avatarColor: '#10b981',
+    messageFa: 'جاده بارونی و به شدت لغزنده‌ست! حواستون به پیچ‌های ناگهانی جاده و ماشین‌های شوتی باشه که یهو جلوتون نپیچن!',
+    objectiveFa: 'کنترل دقیق در پیچ‌های جاده و سبقت بدون تصادف',
+  },
+  {
+    id: 4,
+    stageTrigger: 50,
+    titleFa: 'فصل ۴: تاریکی شبانه طهران',
+    subtitleFa: 'نیمه راه تا قلعه‌نو',
+    speakerFa: 'DJ',
+    avatarColor: '#ec4899',
+    messageFa: 'چراغ‌های نئونی رو روشن کنید! به نیمه راه رسیدیم ولی گارد قلعه‌نو متوجه نزدیک شدن ما شده و جاده پر از موانع سنگی شده!',
+    objectiveFa: 'روشن کردن نیترو و رد کردن خطرات شبانه',
+  },
+  {
+    id: 5,
+    stageTrigger: 75,
+    titleFa: 'فصل ۵: خط ساحلی و درگیری سنگین',
+    subtitleFa: 'نزدیک شدن به دژ اصلی',
+    speakerFa: 'فربد',
+    avatarColor: '#f97316',
+    messageFa: 'تیربارها رو آماده شلیک کنید! کامیون‌ها و ماشین‌های زرهی مافیا سعی دارن نذارن به دروازه قلعه‌نو برسیم!',
+    objectiveFa: 'تخریب خودروهای مهاجم با شلیک‌های پیاپی',
+  },
+  {
+    id: 6,
+    stageTrigger: 100,
+    titleFa: 'فصل نهایی: نبرد در زندان قلعه‌نو',
+    subtitleFa: 'آزادی بزرگ غفلت!',
+    speakerFa: 'حاج علی',
+    avatarColor: '#ef4444',
+    messageFa: 'اینم از قلعه‌نو! دیوارهای زندان رو با نیترو درهم بکوبید و رفیقمون غفلت رو بعد از ۱۰۰ مرحله دلاوری آزاد کنید!',
+    objectiveFa: 'فتح مرحله ۱۰۰ و نجات رسمی غفلت با افتخار!',
+  },
+];
+
+export function getStoryChapterForStage(stage: number): StoryChapter | undefined {
+  return STORY_CHAPTERS.find(ch => ch.stageTrigger === stage);
+}
 
 export function getBiomeForStage(stage: number): BiomeConfig {
   const safeStage = Math.max(1, Math.min(100, stage));
@@ -567,25 +802,25 @@ export function getBiomeForStage(stage: number): BiomeConfig {
 export function getStageMilestones(stage: number): StageMilestoneInfo {
   const safeStage = Math.max(1, Math.min(100, stage));
   
-  // Every 5 levels, max lives +1
+  // Max lives formula: starts at 3, +1 every 5 stages
   const bonusLives = Math.floor(safeStage / 5);
   const maxLives = 3 + bonusLives;
   
-  // Level 10: Nitro unlocked
-  const nitroUnlocked = safeStage >= 10;
+  // Nitro unlocked immediately from Stage 1 for maximum fun!
+  const nitroUnlocked = true;
   
-  // Level 20: Gun unlocked
-  const gunUnlocked = safeStage >= 20;
+  // Gun unlocked from Stage 1 so shooting is always available with ammo
+  const gunUnlocked = true;
   
-  // Nitro charges: 1 (lvl 10), 2 (lvl 40), 3 (lvl 60+)
-  let nitroMaxCharges = 1;
-  if (safeStage >= 60) nitroMaxCharges = 3;
-  else if (safeStage >= 40) nitroMaxCharges = 2;
+  // Nitro charges: 2 (base), 3 (lvl 20+), 4 (lvl 50+)
+  let nitroMaxCharges = 2;
+  if (safeStage >= 50) nitroMaxCharges = 4;
+  else if (safeStage >= 20) nitroMaxCharges = 3;
   
-  // Gun ammo capacity: 3 (lvl 20), 5 (lvl 30), 7 (lvl 50+)
-  let gunMaxAmmo = 3;
-  if (safeStage >= 50) gunMaxAmmo = 7;
-  else if (safeStage >= 30) gunMaxAmmo = 5;
+  // Gun ammo capacity: 5 (lvl 1), 8 (lvl 20), 12 (lvl 45+)
+  let gunMaxAmmo = 5;
+  if (safeStage >= 45) gunMaxAmmo = 12;
+  else if (safeStage >= 20) gunMaxAmmo = 8;
 
   return {
     nitroUnlocked,
@@ -596,29 +831,46 @@ export function getStageMilestones(stage: number): StageMilestoneInfo {
   };
 }
 
-export const STORAGE_KEY = 'younes_abad_save_v1';
+export const STORAGE_KEY = 'nejat_ghaflat_save_v2';
 
 export const DEFAULT_SAVE_DATA: GameSaveData = {
-  coins: 50,
+  coins: 80,
   highestStage: 1,
   selectedCarId: 1,
-  selectedCharacterId: 'maman_bozorg',
+  selectedCharacterId: 'mamad',
   unlockedCars: [1, 2],
-  unlockedCharacters: ['maman_bozorg'],
+  unlockedCharacters: ['mamad'],
   soundEnabled: true,
   musicEnabled: true,
   highScore: 0,
   overtakenCount: 0,
+  unlockedCustomizations: ['decal:none', 'tint:0', 'underglow:none', 'spoiler:none', 'rim:stock'],
+  aparatRewardClaimed: false,
 };
 
 export function loadGameSave(): GameSaveData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('younes_abad_save_v1');
     if (!raw) return DEFAULT_SAVE_DATA;
     const parsed = JSON.parse(raw);
+    
+    // Migrate old character IDs if necessary
+    const validCharIds = ['mamad', 'asghar_banafsheh', 'amin_shift', 'dj', 'mamad_cj', 'ferdinand', 'farbod', 'haj_ali'];
+    let selChar = parsed.selectedCharacterId;
+    if (!validCharIds.includes(selChar)) {
+      selChar = 'mamad';
+    }
+
+    const unlChars = Array.isArray(parsed.unlockedCharacters)
+      ? parsed.unlockedCharacters.filter((c: string) => validCharIds.includes(c))
+      : ['mamad'];
+    if (unlChars.length === 0) unlChars.push('mamad');
+
     return {
       ...DEFAULT_SAVE_DATA,
       ...parsed,
+      selectedCharacterId: selChar,
+      unlockedCharacters: unlChars,
     };
   } catch {
     return DEFAULT_SAVE_DATA;

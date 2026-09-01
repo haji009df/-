@@ -327,6 +327,7 @@ class SoundEngine {
 
   // 1. Car Horn (دکمه بوق) - Persian Dual Tone
   public playHorn(): void {
+    this.resumeIfSuspended();
     if (!this.ctx || !this.sfxGain || this.isMuted) return;
     try {
       const now = this.ctx.currentTime;
@@ -340,7 +341,7 @@ class SoundEngine {
       osc1.frequency.setValueAtTime(440, now); // A4
       osc2.frequency.setValueAtTime(554.37, now); // C#5
 
-      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.setValueAtTime(0.4, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
 
       osc1.connect(gain);
@@ -356,6 +357,7 @@ class SoundEngine {
 
   // 2. Nitro Boost (نیترو)
   public playNitro(): void {
+    this.resumeIfSuspended();
     if (!this.ctx || !this.sfxGain || this.isMuted) return;
     try {
       const now = this.ctx.currentTime;

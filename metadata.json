@@ -1,6 +1,8 @@
 {
-  "name": "Younes Abad",
-  "description": "2D top-down driving game with 100 Iranian highway stages, procedural synth music, garage customization, and character perks.",
+  "name": "نجات غفلت",
+  "description": "بازی رانندگی و ماجراجویی ۲ بعدی نجات غفلت از زندان قلعه‌نو با ۱۰۰ مرحله جذاب، پیچ‌های جاده، شلیک، نیتروژن، ترمز، شخصی‌سازی خودروها و کاراکترهای ویژه.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
